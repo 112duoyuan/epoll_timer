@@ -1,0 +1,35 @@
+pipe 管道
+socketpair 双向管道
+n只能使用UNIX本地域协议族AF_UNIX，因为我们仅能在
+本地使用这个双向管道
+
+----------------------------------------------------
+dup dup2复制文件描述符
+
+sendfile函数
+零拷贝
+
+服务器sendfile传输文件
+-----------------------------------
+mmap函数和munmap函数
+
+--------------------------
+splice 函数
+
+------------
+tee函数
+
+---------------------------------
+fcntl
+
+int setnonblocking(int fd)
+{
+int old_option=fcntl(fd,F_GETFL);/*获取文件描述符旧的状态标志*/
+int new_option=old_option|O_NONBLOCK;/*设置非阻塞标志*/
+fcntl(fd,F_SETFL,new_option);
+return old_option;/*返回文件描述符旧的状态标志，以便*/
+/*日后恢复该状态标志*/
+}
+
+---------------------------------
+chapt6

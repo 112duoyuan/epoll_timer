@@ -1,0 +1,59 @@
+信号处理函数的原型如下：
+#include＜signal.h＞
+typedef void(*__sighandler_t)(int);
+-----------------------------------------
+
+信号设置处理函数
+_sighandler_t signal(int sig,_sighandler_t_handler)
+sig参数指出要捕获的信号类型。_handler参数是_sighandler_t类型的
+函数指针，用于指定信号sig的处理函数。
+
+=================================================================
+
+信号处理函数的更健壮的接口
+int sigaction(int sig,const struct sigaction*act,struct
+sigaction*oact);
+
+struct sigaction
+{
+#ifdef__USE_POSIX199309
+union
+{
+_sighandler_t sa_handler;
+void(*sa_sigaction)(int,siginfo_t*,void*);
+}
+_sigaction_handler;
+#define sa_handler__sigaction_handler.sa_handler
+#define sa_sigaction__sigaction_handler.sa_sigaction
+#else
+_sighandler_t sa_handler;
+#endif
+_sigset_t sa_mask;
+int sa_flags;
+void(*sa_restorer)(void);
+};
+
+
+=================================================================
+信号集
+#include＜bits/sigset.h＞
+#define_SIGSET_NWORDS(1024/(8*sizeof(unsigned long int)))
+typedef struct
+{
+unsigned long int__val[_SIGSET_NWORDS];
+}__sigset_t;
+
+int sigemptyset(sigset_t*_set)/*清空信号集*/
+int sigfillset(sigset_t*_set)/*在信号集中设置所有信号*/
+int sigaddset(sigset_t*_set,int_signo)/*将信号_signo添加至信号集中*/
+int sigdelset(sigset_t*_set,int_signo)/*将信号_signo从信号集中删除*/
+int sigismember(_const sigset_t*_set,int_signo)/*测试_signo是否在信
+号集中*/
+=======================================================================
+设置或查看进程的信号掩码
+int sigprocmask(int_how,_const sigset_t*_set,sigset_t*_oset);
+
+获得进程当前被挂起的信号集
+int sigpending(sigset_t*set);
+
+SIGHUP SIGPIPE SIGURG

@@ -1,0 +1,7 @@
+Linux提供了三种定时方法，它们是：
+
+socket选项SO_RCVTIMEO和SO_SNDTIMEO
+SIGALRM信号
+I/O复用系统调用的超时参数
+========================================
+

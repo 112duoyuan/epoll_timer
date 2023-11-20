@@ -1,0 +1,144 @@
+#host to network long 长整数32位 用于转换IP 
+unsigned long int htonl(unsigned long int hostlong);
+
+#host to network short 短整型函数用于转换端口
+unsigned short int htons(unsigned short int hostshort);
+
+unsigned long int ntohl(unsigned long int netlong);
+unsigned short int ntohs(unsigned short int netshort);
+
+协议族、地址族？？
+struct sockaddr
+{
+sa_family_t sa_family;
+char sa_data[14];
+}
+sa_data成员用于存放socket地址值。
+
+struct sockaddr_storage
+{
+sa_family_t sa_family;
+unsigned long int__ss_align;
+char__ss_padding[128-sizeof(__ss_align)];
+}
+
+---------------------------------------------
+UNIX
+struct sockaddr_un
+{
+sa_family_t sin_family;/*地址族：AF_UNIX*/
+char sun_path[108];/*文件路径名*/
+};
+
+IPV4 IPV6 
+struct sockaddr_in
+{
+sa_family_t sin_family;/*地址族：AF_INET*/
+u_int16_t sin_port;/*端口号，要用网络字节序表示*/
+struct in_addr sin_addr;/*IPv4地址结构体，见下面*/
+};
+struct in_addr
+{
+u_int32_t s_addr;/*IPv4地址，要用网络字节序表示*/
+};
+
+
+struct sockaddr_in6
+{
+sa_family_t sin6_family;/*地址族：AF_INET6*/
+u_int16_t sin6_port;/*端口号，要用网络字节序表示*/
+u_int32_t sin6_flowinfo;/*流信息，应设置为0*/
+struct in6_addr sin6_addr;/*IPv6地址结构体，见下面*/
+u_int32_t sin6_scope_id;/*scope ID，尚处于实验阶段*/
+};
+struct in6_addr
+{
+unsigned char sa_addr[16];/*IPv6地址，要用网络字节序表示*/
+};
+
+//IP地址转换函数
+#十进制转网络字节序整数表示的IPv4
+in_addr_t inet_addr(const char*strptr);
+
+#功能同上，不过将结果存储于参数inp指向的地址结构中
+int inet_aton(const char*cp,struct in_addr*inp);
+
+##网络字节序整数表示IPV4转换为十进制 使用静态内存存储结果，不可重入使用
+char*inet_ntoa(struct in_addr in);
+
+#将src存储的IPV4或IPV6十进制字符串转换为网络字节序整数表示的IP地址。结果存储于
+dst指向的内存，af表示地址族
+int inet_pton(int af,const char*src,void*dst);
+
+#与前者相反 前三个参数一样，最后一个指定存储单元大小
+const char*inet_ntop(int af,const void*src,char*dst,socklen_t cnt);
+两个宏控制存储单元大小
+#include＜netinet/in.h＞
+#define INET_ADDRSTRLEN 16
+#define INET6_ADDRSTRLEN 46
+
+------------------------------------------------------------------
+
+struct msghdr
+{
+void*msg_name;/*socket地址*/
+socklen_t msg_namelen;/*socket地址的长度*/
+struct iovec*msg_iov;/*分散的内存块，见后文*/
+int msg_iovlen;/*分散内存块的数量*/
+void*msg_control;/*指向辅助数据的起始位置*/
+socklen_t msg_controllen;/*辅助数据的大小*/
+int msg_flags;/*复制函数中的flags参数，并在调用过程中更新*/
+}
+struct iovec
+{
+void*iov_base;/*内存起始地址*/
+size_t iov_len;/*这块内存的长度*/
+};
+结构体用于recvmsg、sendmsg
+
+带外标记？？？
+
+------------------------------------------------------------------
+SO_REUSEADDR选项
+到服务器程序可以通过设置socket选项SO_REUSEADDR来强制使用被处于
+TIME_WAIT状态的连接占用的socket地址
+
+
+SO_RCVBUF和SO_SNDBUF选项 表示TCP接收缓冲区和发送缓冲区的大小
+分开收、集中写
+
+--------------------------------------------------------------------
+SO_RCVLOWAT和SO_SNDLOWAT选项
+它们一般被I/O复用系统调用（见第9章）用来判断socket是否可读或可写。
+
+SO_LINGER选项?????
+-------------------------------------------------------------------
+int getaddrinfo(const char*hostname,const char*service,const
+struct addrinfo*hints,struct addrinfo**result);
+
+struct addrinfo
+{
+int ai_flags;/*见后文*/
+int ai_family;/*地址族*/
+int ai_socktype;/*服务类型，SOCK_STREAM或SOCK_DGRAM*/
+int ai_protocol;/*见后文*/
+socklen_t ai_addrlen;/*socket地址ai_addr的长度*/
+char*ai_canonname;/*主机的别名*/
+struct sockaddr*ai_addr;/*指向socket地址*/
+struct addrinfo*ai_next;/*指向下一个sockinfo结构的对象*/
+};
+freeaddrinfo
+
+chapt5 done!
+
+
+
+
+
+
+
+
+
+
+
+

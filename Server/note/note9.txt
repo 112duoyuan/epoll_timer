@@ -1,0 +1,50 @@
+int select(int nfds,fd_set*readfds,fd_set*writefds,fd_set*exceptfds,struct
+timeval*timeout);
+
+FD_ZERO(fd_set*fdset);/*清除fdset的所有位*/
+FD_SET(int fd,fd_set*fdset);/*设置fdset的位fd*/
+FD_CLR(int fd,fd_set*fdset);/*清除fdset的位fd*/
+int FD_ISSET(int fd,fd_set*fdset);/*测试fdset的位fd是否被设置*/
+
+-----------------------------------------------------------------
+epoll
+
+struct epoll_event
+{
+__uint32_t events;/*epoll事件*/
+epoll_data_t data;/*用户数据*/
+};
+
+typedef union epoll_data
+{
+void*ptr;
+int fd;
+uint32_t u32;
+uint64_t u64;
+}epoll_data_t;
+
+------------------------------------------------------------------------------
+
+/*如何索引poll返回的就绪文件描述符*/
+int ret=poll(fds,MAX_EVENT_NUMBER,-1);
+/*必须遍历所有已注册文件描述符并找到其中的就绪者（当然，可以利用ret来稍做优
+化）*/
+for(int i=0;i＜MAX_EVENT_NUMBER;++i)
+{
+if(fds[i].revents＆POLLIN)/*判断第i个文件描述符是否就绪*/
+{
+int sockfd=fds[i].fd;
+/*处理sockfd*/
+}
+}
+/*如何索引epoll返回的就绪文件描述符*/
+int ret=epoll_wait(epollfd,events,MAX_EVENT_NUMBER,-1);
+/*仅遍历就绪的ret个文件描述符*/
+for(int i=0;i＜ret;i++)
+{
+int sockfd=events[i].data.fd;
+/*sockfd肯定就绪，直接处理*/
+}
+
+--------------------------------------------------------------------------------
+P341 select poll epoll 区别
