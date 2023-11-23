@@ -1,0 +1,33 @@
+tcpdump、nc、strace、lsof、netstat、vmstat、ifstat和mpstat
+
+代码清单17-1 用lsof命令查看websrv服务器打开的文件描述符
+=====================================================================
+
+$ps-ef|grep websrv#先获取websrv程序的进程号
+shuang 6346 5439 0 23:41 pts/3 00:00:00./websrv 127.0.0.1 13579
+$sudo lsof-p 6346#用-p选项指定进程号
+COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME
+websrv 6346 shuang cwd DIR 8,3 4096
+1199520/home/shuang/codes/pool_thread
+websrv 6346 shuang rtd DIR 8,3 4096 2/
+websrv 6346 shuang txt REG 8,3 64817
+1199765/home/shuang/codes/pool_thread/websrv
+websrv 6346 shuang mem REG 8,3 157200 1319677/lib/ld-2.14.90.so
+websrv 6346 shuang mem REG 8,3 2000316 1319678/lib/libc-2.14.90.so
+websrv 6346 shuang mem REG 8,3 135556 1319682/lib/libpthread-
+2.14.90.so
+websrv 6346 shuang mem REG 8,3 208320 1319681/lib/libm-2.14.90.so
+websrv 6346 shuang mem REG 8,3 115376 1319685/lib/libgcc_s-4.6.2-
+20111027.so.1
+websrv 6346 shuang mem REG 8,3 948524
+814873/usr/lib/libstdc++.so.6.0.16
+websrv 6346 shuang 0u CHR 136,3 0t0 6/dev/pts/3
+websrv 6346 shuang 1u CHR 136,3 0t0 6/dev/pts/3
+websrv 6346 shuang 2u CHR 136,3 0t0 6/dev/pts/3
+websrv 6346 shuang 3u IPv4 43816 0t0 TCP localhost:13579
+websrv 6346 shuang 4u 0000 0,9 0 4447 anon_inode
+
+=========================================================================
+
+netstat
+

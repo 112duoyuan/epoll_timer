@@ -1,0 +1,119 @@
+查看用户级文件描述符数限制
+ulimit -n 
+
+将用户级文件描述符数限制设定为max-file-number
+ulimit-SHn max-file-number
+设置是临时的，只在当前的session中有效
+==============================================
+
+修改系统级文件描述符数限制
+sysctl-w fs.file-max-file-number
+也是临时的
+永久修改系统限制在/etc/sysctl.conf文件中添加如下一项
+fs.file-max=max-file-number
+
+执行sysctl-p命令使更改生效;
+
+==========================================================
+
+gdb调试
+
+查看cgisrv程序的进程id号：
+ps-ef|grep cgisrv
+
+$gdb 
+(gdb) attach pid(对应进程号)	//将进程加到gdb调试器中
+
+(gdb)set follow-fork-mode mode //允许我们选择程序在执行fork系
+统调用后是继续调试父进程还是调试子进程
+
+----------------------------------------------------------------------------
+1.调试子进程
+
+$gdb./cgisrv
+(gdb)set follow-fork-mode child
+(gdb)b processpool.h:264
+Breakpoint 1 at 0x8049787:file processpool.h,line 264.
+(gdb)r 127.0.0.1 12345
+Starting program:/home/shuang/codes/pool_process/cgisrv 127.0.0.1
+12345
+[New process 4148]
+send request to child 0
+[Switching to process 4148]
+Breakpoint 1,processpool＜cgi_conn＞::run_child(this=0x804c008)at
+processpool.h:264
+264 users[sockfd].process();
+Missing separate debuginfos,use:debuginfo-install glibc-2.14.90-
+24.fc16.6.i686
+(gdb)bt
+#0 processpool＜cgi_conn＞::run_child(this=0x804c008)at
+processpool.h:264
+#1 0x080491fe in processpool＜cgi_conn＞::run(this=0x804c008)at
+processpool.h:169
+#2 0x08048ef9 in main(argc=3,argv=0xbffff4e4)at main.cpp:138
+(gdb)
+
+------------------------------------------------------------------------------
+
+16.3.2 用gdb调试多线程程序
+
+
+$gdb./websrv
+(gdb)b main.cpp:130/*设置父线程中的断点*/
+Breakpoint 1 at 0x80498d3:file main.cpp,line 130.
+(gdb)b threadpool.h:105/*设置子线程中的断点*/
+Breakpoint 2 at 0x804a10b:file threadpool.h,line 105.
+(gdb)r 127.0.0.1 12345
+Starting program:/home/webtop/codes/pool_thread/websrv 127.0.0.1
+12345
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library"/lib/libthread_db.so.1".
+create the 0th thread
+[New Thread 0xb7fe1b40(LWP 5756)]
+/*从另一个终端使用telnet 127.0.0.1 12345来连接服务器并发送一些数据，调试器
+就按照我们预期的，在断点处暂停*/
+Breakpoint 1,main(argc=3,argv=0xbffff4e4)at main.cpp:130
+130 if(users[sockfd].read())
+(gdb)info threads/*查看线程信息。当前被调试的是主线程，其ID为1*/
+Id Target Id Frame
+2 Thread 0xb7fe1b40(LWP 5756)"websrv"0x00111416
+in__kernel_vsyscall()
+*1 Thread 0xb7fe3700(LWP
+5753)"websrv"main(argc=3,argv=0xbffff4e4)at main.cpp:130
+(gdb)set scheduler-locking on/*不执行其他线程，锁定调试对象*/
+(gdb)n/*下面的操作都将执行父线程的代码*/
+132 pool-＞append(users+sockfd);
+(gdb)n
+103 for(int i=0;i＜number;i++)
+(gdb)
+94 while(true)
+(gdb)
+96 int number=epoll_wait(epollfd,events,MAX_EVENT_NUMBER,-1);
+(gdb)
+^C
+Program received signal SIGINT,Interrupt.
+0x00111416 in__kernel_vsyscall()
+(gdb)thread 2/*将调试切换到子线程，其ID为2*/
+[Switching to thread 2(Thread 0xb7fe1b40(LWP 5756))]
+#0 0x00111416 in__kernel_vsyscall()
+(gdb)bt/*显示子线程的调用栈*/
+#0 0x00111416 in__kernel_vsyscall()
+#1 0x44d91c05 in sem_wait@@GLIBC_2.1()from/lib/libpthread.so.0
+#2 0x08049aff in sem::wait(this=0x804e034)at locker.h:24
+#3 0x0804a0db in threadpool＜http_conn＞::run(this=0x804e008)at
+threadpool.h:98
+#4 0x08049f8f in threadpool＜http_conn＞::worker(arg=0x804e008)at
+threadpool.h:89
+#5 0x44d8bcd3 in start_thread()from/lib/libpthread.so.0
+#6 0x44cc8a2e in clone()from/lib/libc.so.6
+(gdb)n/*下面的操作都将执行子线程的代码*/
+Single stepping until exit from function__kernel_vsyscall,
+which has no line number information.
+0x44d91c05 in sem_wait@@GLIBC_2.1()from/lib/libpthread.so.0
+(gdb)
+
+------------------------------------------------------------------------
+
+16.4 压力测试
+
+

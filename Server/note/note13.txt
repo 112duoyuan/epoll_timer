@@ -1,0 +1,105 @@
+fork 
+该函数的每次调用都返回两次，在父进程中返回的是子进程的
+PID，在子进程中则返回0。
+
+===========================================================
+exec系列系统调用
+extern char**environ;
+int execl(const char*path,const char*arg,...);
+int execlp(const char*file,const char*arg,...);
+int execle(const char*path,const char*arg,...,char*const envp[]);
+int execv(const char*path,char*const argv[]);
+int execvp(const char*file,char*const argv[]);
+int execve(const char*path,char*const argv[],char*const envp[]);
+
+===================================================================
+
+#include＜sys/types.h＞
+#include＜sys/wait.h＞
+pid_t wait(int*stat_loc);
+pid_t waitpid(pid_t pid,int*stat_loc,int options);
+
+=====================================================
+
+SIGCHLD信号的典型处理函数
+static void handle_child(int sig)
+{
+pid_t pid;
+int stat;
+while((pid=waitpid(-1,＆stat,WNOHANG))＞0)
+{
+/*对结束的子进程进行善后处理*/
+}
+}
+
+====================================================
+#include＜sys/sem.h＞
+int semget(key_t key,int num_sems,int sem_flags);
+
+num_sems参数指定要创建/获取的信号量集中信号量的数目
+--------------------------------------------------------
+
+共享内存和消息队列
+shmget系统调用创建一段新的共享内存，或者获取一段已经存在的
+共享内存。
+
+#include＜sys/shm.h＞
+int shmget(key_t key,size_t size,int shmflg);
+
+struct shmid_ds
+{
+struct ipc_perm shm_perm;/*共享内存的操作权限*/
+size_t shm_segsz;/*共享内存大小，单位是字节*/
+__time_t shm_atime;/*对这段内存最后一次调用shmat的时间*/
+__time_t shm_dtime;/*对这段内存最后一次调用shmdt的时间*/
+__time_t shm_ctime;/*对这段内存最后一次调用shmctl的时间*/
+__pid_t shm_cpid;/*创建者的PID*/
+__pid_t shm_lpid;/*最后一次执行shmat或shmdt操作的进程的PID*/
+shmatt_t shm_nattach;/*目前关联到此共享内存的进程数量*/
+/*省略一些填充字段*/
+};
+
+===================================================================
+
+共享内存
+通过打开同一个文件，mmap也可以实现无关进程之间的内存共享
+
+int shm_open(const char*name,int oflag,mode_t mode);
+=============================================================
+
+int msgget(key_t key,int msgflg);
+创建一个消息队列，或者获取一个已有的消息队列
+
+struct msqid_ds
+{
+struct ipc_perm msg_perm;/*消息队列的操作权限*/
+time_t msg_stime;/*最后一次调用msgsnd的时间*/
+time_t msg_rtime;/*最后一次调用msgrcv的时间*/
+time_t msg_ctime;/*最后一次被修改的时间*/
+unsigned long__msg_cbytes;/*消息队列中已有的字节数*/
+msgqnum_t msg_qnum;/*消息队列中已有的消息数*/
+msglen_t msg_qbytes;/*消息队列允许的最大字节数*/
+pid_t msg_lspid;/*最后执行msgsnd的进程的PID*/
+pid_t msg_lrpid;/*最后执行msgrcv的进程的PID*/
+};
+
+int msgsnd(int msqid,const void*msg_ptr,size_t msg_sz,int msgflg);
+
+struct msgbuf
+{
+long mtype;/*消息类型*/
+char mtext[512];/*消息数据*/
+};
+
+int msgctl(int msqid,int command,struct msqid_ds*buf)
+
+============================================================
+
+进程间传递文件描述符
+
+
+
+
+
+
+

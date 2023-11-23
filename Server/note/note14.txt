@@ -1,0 +1,29 @@
+POSIX信号量、互斥量和条件变量 
+
+
+==================================
+#include＜semaphore.h＞
+int sem_init(sem_t*sem,int pshared,unsigned int value);
+pshared参数指定信号量的类型。如果其值为0，就表示这个信号量是当前进程的局部信号量
+
+int sem_destroy(sem_t*sem);
+int sem_wait(sem_t*sem);
+int sem_trywait(sem_t*sem);
+int sem_post(sem_t*sem);
+
+==========================================================
+
+nclude＜pthread.h＞
+int pthread_cond_init(pthread_cond_t*cond,const
+pthread_condattr_t*cond_attr);
+int pthread_cond_destroy(pthread_cond_t*cond);
+int pthread_cond_broadcast(pthread_cond_t*cond);
+int pthread_cond_signal(pthread_cond_t*cond);
+int pthread_cond_wait(pthread_cond_t*cond,pthread_mutex_t*mutex);
+
+==========================================================
+
+数pthread_atfork，以确保fork调
+用后父进程和子进程都拥有一个清楚的锁状态
+
+
