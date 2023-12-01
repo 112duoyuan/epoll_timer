@@ -37,11 +37,11 @@ int main(int argc,char*argv[])
         send(sockfd,normal_data,strlen(normal_data),0);
         // send(sockfd,send_data,strlen(send_data),0);
     }
-    // char buffer[1024 *10]={0};
-    // while(recv(sockfd,buffer,sizeof(buffer)-1,0) >0){
-    //     printf("recv from web.....\n");
-    // }
-    // printf("recv from web data is %s\n",buffer);
+    char buffer[1024 *10]={0};
+    while(recv(sockfd,buffer,sizeof(buffer)-1,0) >0){
+        printf("recv from web.....\n");
+    }
+    printf("recv from web data is %s\n",buffer);
     close(sockfd);
     return 0;
 }

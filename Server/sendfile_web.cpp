@@ -19,6 +19,7 @@ int main(int argc,char*argv[]){
     const char*ip=argv[1];
     int port=atoi(argv[2]);
     const char*file_name=argv[3];
+    
     int filefd=open(file_name,O_RDONLY);
     assert(filefd>0);
     struct stat stat_buf;

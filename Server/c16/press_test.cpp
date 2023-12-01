@@ -19,6 +19,7 @@ $./stress_test 192.168.1.108 12345 1000#在Kongming20上执行
 static const char*request="GET http://localhost/index.html HTTP/1.1\r\nConnection:keep-alive\r\n\r\nxxxxxxxxxxxx";
 int setnonblocking(int fd){
     int old_option=fcntl(fd,F_GETFL);
+    //添加事件
     int new_option=old_option|O_NONBLOCK;
     fcntl(fd,F_SETFL,new_option);
     return old_option;
@@ -27,6 +28,7 @@ int setnonblocking(int fd){
 void addfd(int epoll_fd,int fd){
     epoll_event event;
     event.data.fd=fd;
+    //添加事件 写 ET 服务器出错
     event.events=EPOLLOUT|EPOLLET|EPOLLERR;
     epoll_ctl(epoll_fd,EPOLL_CTL_ADD,fd,&event);
     setnonblocking(fd);
@@ -75,6 +77,7 @@ void start_conn(int epoll_fd,int num,const char*ip,int port){
     address.sin_port=htons(port);
     for(int i=0;i<num;++i){
         sleep(1);
+        //创建套接字
         int sockfd=socket(PF_INET,SOCK_STREAM,0);
         printf("create 1 sock\n");
         if(sockfd<0){
@@ -82,6 +85,7 @@ void start_conn(int epoll_fd,int num,const char*ip,int port){
         }
         if(connect(sockfd,(struct sockaddr*)&address,sizeof(address))==0){
             printf("build connection%d\n",i);
+            //添加socket连接描述符进入epoll实例中
             addfd(epoll_fd,sockfd);
         }
     }
@@ -94,7 +98,9 @@ void close_conn(int epoll_fd,int sockfd){
 
 int main(int argc,char*argv[]){
     assert(argc==4);
+    //创建epoll实例，监听最大数目是100
     int epoll_fd=epoll_create(100);
+    //创建连接
     start_conn(epoll_fd,atoi(argv[3]),argv[1],atoi(argv[2]));
     epoll_event events[10000];
     char buffer[2048];
@@ -102,6 +108,7 @@ int main(int argc,char*argv[]){
         int fds=epoll_wait(epoll_fd,events,10000,2000);
         for(int i=0;i<fds;i++){
             int sockfd=events[i].data.fd;
+            // & 意为是
             if(events[i].events&EPOLLIN){
                 if(!read_once(sockfd,buffer,2048)){
                     close_conn(epoll_fd,sockfd);
